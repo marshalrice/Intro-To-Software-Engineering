@@ -1,0 +1,391 @@
+openapi: '3.0.0'
+info:
+  version: '1.0.0'
+  title: 'Loyalty and Promotions'
+  description: 
+    An API for manipulating site-wide discounts or promotions. 
+    
+    Discounts can be retrieved all
+    at once, or retrieved by parameters (ID, AccessCode, StartDate, EndDate, Name, Type), or 
+    retrieved in a sorted list based on AccessCode, Name, StartDate, EndDate.
+    Discounts can be deleted all at once, or by parameters (name, startDate, endDate)
+    Discounts can be Posted individually, requires Discount Body (amount can be 0 if NA)
+    Disscounts can be Put or updated by their startDate or endDate.
+    
+
+servers:
+  - url: https://cusports.com/api
+  
+paths:
+  /discounts:
+    get:
+      summary: "Get all discounts"
+      description: 
+        This method gets all of the Discounts in the form of an array of Objects, which hold
+        Discount representations per index in the array. This list can be filtered with query
+        parameters that are listed in the components part of the file.
+
+      parameters:
+        # parameters for filtering discounts
+        - $ref: '#/components/parameters/AccessCode'
+        - $ref: '#/components/parameters/StartDate'
+        - $ref: '#/components/parameters/EndDate'
+        - $ref: '#/components/parameters/Name'
+        - $ref: '#/components/parameters/Type'
+
+        # parameters for sorting discounts
+        - $ref: '#/components/parameters/SortAccessCodeAsc'
+        - $ref: '#/components/parameters/SortAccessCodeDesc'
+        - $ref: '#/components/parameters/SortNameAsc'
+        - $ref: '#/components/parameters/SortNameDesc'
+        - $ref: '#/components/parameters/SortStartDate'
+        - $ref: '#/components/parameters/SortEndDate'
+        
+      responses:
+        #success
+        200:
+          description: "All respective discounts have been returned"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Discounts'
+        #client error        
+        404:
+          description: "404 Error Handling GET Request"
+          $ref: '#/components/schemas/400'
+        #server error
+        500:
+          $ref: '#/components/schemas/500'
+    post:
+      summary: Add a new discount
+      requestBody:
+        description: Discount Representation (discount amount can be 0 if Not applicable)
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Discounts'
+      responses:
+        #success
+        200:
+          description: New discount added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Discounts'
+        #client error
+        400:
+          $ref: '#/components/schemas/400'
+        #server error
+        500:
+          $ref: '#/components/schemas/500'
+    put:
+      summary: "Bulk update of discounts"
+      requestBody:
+          $ref: '#/components/schemas/Discounts'
+      responses:
+        #success
+        200:
+          description: New discount added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Discounts'
+        #client error
+        404:
+          $ref: '#/components/schemas/400'
+        #server error
+        500:
+          $ref: '#/components/schemas/500'
+    delete:
+      summary: "Delete all respective discounts"
+      parameters:
+        - name: name
+          in: query
+          required: false
+          description: "Deletes discounts by name"
+          schema:
+            type: string   
+        - name: startDate
+          in: query
+          required: false
+          description: "Deletes all discounts with the same start date."
+          schema:
+            type: string
+        - name: endDate
+          in: query
+          required: false
+          description:  "Deletes all discounts with the same end date."
+          schema:
+            type: string
+      responses:
+        #success
+        200:
+          description: "All respective discounts have been deleted successfully."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Discounts'
+        #client error
+        404:
+          $ref: '#/components/schemas/400'
+        #server error
+        500:
+          $ref: '#/components/schemas/500'    
+  /discount/{id}:
+    get:
+      summary: "Get a discount"
+      description: 
+        This method gets a specific discount based on it's id
+
+      parameters:
+        - $ref: '#/components/parameters/id'
+        
+      responses:
+        #success
+        200:
+          description: "The Discount was successfully retrieved."
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Discounts'
+        #client error        
+        404:
+          description: "404 Error Handling GET Request"
+          $ref: '#/components/schemas/400'
+        #server error
+        500:
+          $ref: '#/components/schemas/500'
+    patch:
+      summary: "Update a discount with a few changes. Only the parts of the discount that need to be changed should be in the request body."
+      parameters:
+        - $ref: '#/components/parameters/id'
+      requestBody:
+        description:  At least one Discount property is required for the request body.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Discount'
+      responses:
+        #success
+        200:
+          description: Discount updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Discount'
+        #client error
+        400:
+          $ref: '#/components/schemas/400'
+        #server error
+        500:
+          $ref: '#/components/schemas/500'
+    put:
+      summary: "Updates a Discount by it's ID. A full Discount request body is needed."
+      parameters:
+        - $ref: '#/components/parameters/id'
+      requestBody:
+        description: This request body needs a full Discount representation to work successfully.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Discount'
+              
+      responses:
+        #success
+        200:
+          description: Discount updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Discount'
+        #client error
+        400:
+          $ref: '#/components/schemas/400'
+        #server error
+        500:
+          $ref: '#/components/schemas/500'
+    delete:
+      summary: "Deletes a Discount by ID."
+      parameters:
+        - $ref: '#/components/parameters/id'              
+      responses:
+        #success
+        200:
+          description: Discount deleted successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Discount'
+        #client error
+        400:
+          $ref: '#/components/schemas/400'
+        #server error
+        500:
+          $ref: '#/components/schemas/500'
+
+        
+      
+
+    
+
+components:
+  responses:
+    400:
+      description: Discount not found or invalid
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                description: A human readable error message
+                type: string
+    500:
+      description: Server error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                description: A human readable error message
+                type: string
+                
+  parameters:
+    id:
+      name: id
+      in: path
+      description: Gets discount by specific ID
+      required: true
+      schema:
+        type: string
+    AccessCode:
+      name: Access Code
+      in: query
+      description: Gets discount by specific access code
+      schema:
+        type: string
+    StartDate:
+      name: startDate
+      in: query
+      description: Get discounts by specified start date
+      schema:
+        type: string
+    EndDate:
+      name: endDate
+      in: query
+      description: Get the discounts by specified end date
+      schema:
+        type: string
+    Name:
+      name: name
+      in: query
+      description: Get the discounts by specified name 
+      schema:
+        type: string
+    SortAccessCodeAsc:
+      name: accessCode
+      in: query
+      description: Sort the discounts by ascending access Code
+      schema:
+        type: string
+    SortAccessCodeDesc:
+      name: accessCode
+      in: query
+      description: Sort the discounts by descending access Code
+      schema:
+        type: string
+    SortNameAsc:
+      name: name
+      in: query
+      description: Sorts the discounts by ascending name 
+      schema:
+        type: string
+    SortNameDesc:
+      name: name
+      in: query
+      description: Sorts the discounts by descending name 
+      schema:
+        type: string
+    SortStartDate:
+      name: Start date
+      in: query
+      description: Sorts the discounts by chronological start dates
+      schema:
+        type: string
+    SortEndDate:
+      name: End date
+      in: query
+      description: Sorts the discounts by chronological end dates
+      schema:
+        type: string
+    Type:
+      name: type
+      in: query
+      description: Get discounts by discount type
+      schema:
+        type: string
+        
+  schemas:
+    Discounts:
+      description: 
+        An array of Discount objects that located in the path 
+        /discounts. Query parameters can also be used to filter 
+        the list of Discounts to a desired order, start or end date,
+        access code, or by an ID.
+      type: array
+      items:
+          $ref: '#/components/schemas/Discount'
+    Discount:
+      type: object
+      description:
+        The object that will contain all information about a single discount. 
+        A discount will contain the following properties...
+        ID, name, description, type, amount, access code, start date, and end date. 
+        All properties are string types.
+      required:
+        - id
+        - name
+        - description
+        - type
+        - amount
+        - accessCode
+        - startDate
+        - endDate
+      properties:
+        id:
+          description: a unique identifier for each discount
+          type: string
+        name:
+          description: The name that will be seen by non-administrators.
+          type: string
+        description:
+          description: A string of information detailing certain information about the discount.
+          type: string    
+        type:
+          description: The indentifying type of which this discount is by code standards.
+          type: string
+        amount:
+          description: The percentage of how much off this discount will provide to customers' that use this discount.
+          type: number
+        accessCode:
+          description: The code used to be granted the amount off of this discount to a customer.
+          type: string
+        startDate:
+          description: The date at which this discount will be available to customers to access it's amount off properties.
+          type: string
+        endDate:
+          description: The date at which this discount will be unavailable to use by customers.
+          type: string
+
+  securitySchemes:
+    ApiKey:
+      type: apiKey
+      in: header
+      name: promo-api-key
+
+security:
+  - ApiKey: []
